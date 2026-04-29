@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrimart | Jalgaon's Premium Farmer Market</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Leaflet Maps CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- html2canvas for Downloadable ID Cards -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="toast-container"></div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#home" class="logo" onclick="navigate('home')">
+                <i class="fa-solid fa-leaf"></i> Agrimart
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home" onclick="navigate('home')">Home</a></li>
+                <li><a href="#buy" onclick="navigate('buy')">Buy</a></li>
+                <li><a href="#sell" onclick="navigate('sell')">Sell</a></li>
+                <li><a href="#orders" onclick="navigate('orders')">My Orders</a></li>
+                <li><a href="#market" onclick="navigate('market')">Market Rates</a></li>
+                <li><a href="#doctor" onclick="navigate('doctor')">Crop Doctor</a></li>
+                <li><a href="#track" onclick="navigate('track')">Track Order</a></li>
+                <li id="auth-nav"><a href="#login" onclick="navigate('login')" class="btn btn-primary"
+                        style="padding: 0.5rem 1rem; color: white;">Login</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main id="app-content">
+        <!-- Content gets injected here -->
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h3><i class="fa-solid fa-leaf"></i> Agrimart</h3>
+                <p>Empowering farmers in Jalgaon, Maharashtra with premium agricultural products and services.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#market" onclick="navigate('market')">Daily Mandi Rates</a></li>
+                    <li><a href="#doctor" onclick="navigate('doctor')">Crop Doctor</a></li>
+                    <li><a href="#track" onclick="navigate('track')">Order Tracking</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><a href="https://maps.google.com/?q=Jalgaon,+Maharashtra" target="_blank" style="color:inherit; text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Jalgaon, Maharashtra</a></p>
+                <p><a href="tel:+919552961621" style="color:inherit; text-decoration:none;"><i class="fa-solid fa-phone"></i> +91 9552961621</a></p>
+                <p><a href="mailto:info@agrimart.com" style="color:inherit; text-decoration:none;"><i class="fa-solid fa-envelope"></i> info@agrimart.com</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Agrimart. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Templates for different views -->
+    <template id="tmpl-home">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Grow Better with <span>Agrimart</span></h1>
+                <p>Jalgaon's trusted marketplace for farmers. Buy premium supplies, sell your produce securely, and
+                    access daily market rates.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="navigate('buy')">Shop Supplies</button>
+                    <button class="btn btn-secondary" onclick="navigate('sell')">Sell Produce</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2 class="section-title">Our Services</h2>
+                <div class="features-grid">
+                    <div class="feature-card" onclick="navigate('buy')">
+                        <div class="feature-icon"><i class="fa-solid fa-seedling"></i></div>
+                        <h3>Buy Products</h3>
+                        <p>High-quality fertilizers, seeds, tools, pesticides & dairy.</p>
+                    </div>
+                    <div class="feature-card" onclick="navigate('sell')">
+                        <div class="feature-icon"><i class="fa-solid fa-basket-shopping"></i></div>
+                        <h3>Sell Produce</h3>
+                        <p>Get the best price for vegetables, fruits, and milk.</p>
+                    </div>
+                    <div class="feature-card" onclick="navigate('market')">
+                        <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <h3>Market Rates</h3>
+                        <p>Live daily Mandi rates for crops in Jalgaon district.</p>
+                    </div>
+                    <div class="feature-card" onclick="navigate('doctor')">
+                        <div class="feature-icon"><i class="fa-solid fa-stethoscope"></i></div>
+                        <h3>Crop Doctor</h3>
+                        <p>AI-powered diagnosis for your crop health issues.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-buy">
+        <section class="page-section">
+            <div class="container">
+                <h2 class="section-title">Buy Agricultural Products</h2>
+
+                <div
+                    style="margin-bottom: 30px; position: relative; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <i class="fa-solid fa-search" style="position: absolute; left: 15px; top: 14px; color: #888;"></i>
+                    <input type="text" id="buy-search-input" onkeyup="filterProducts()"
+                        placeholder="Search fertilizers, seeds, tools..."
+                        style="width: 100%; padding: 12px 15px 12px 45px; border: 2px solid #e5e7eb; border-radius: 25px; font-size: 1rem; outline: none; transition: border-color 0.3s;"
+                        onfocus="this.style.borderColor='var(--primary-color)'"
+                        onblur="this.style.borderColor='#e5e7eb'">
+                </div>
+
+                <h3
+                    style="margin-top:20px; margin-bottom: 20px; color:var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; display: inline-block;">
+                    Premium Fertilizers</h3>
+                <div class="features-grid" id="cat-fertilizers" style="margin-bottom: 40px;">
+                    Loading Fertilizers...
+                </div>
+
+                <h3
+                    style="margin-top:20px; margin-bottom: 20px; color:var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; display: inline-block;">
+                    Certified Seeds</h3>
+                <div class="features-grid" id="cat-seeds" style="margin-bottom: 40px;"></div>
+
+                <h3
+                    style="margin-top:20px; margin-bottom: 20px; color:var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; display: inline-block;">
+                    Farming Tools</h3>
+                <div class="features-grid" id="cat-tools" style="margin-bottom: 40px;"></div>
+
+                <h3
+                    style="margin-top:20px; margin-bottom: 20px; color:var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; display: inline-block;">
+                    Safe Pesticides</h3>
+                <div class="features-grid" id="cat-pesticides"></div>
+
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-sell">
+        <section class="page-section">
+            <div class="container" style="max-width: 600px;">
+                <h2 class="section-title">Sell Your Produce</h2>
+                <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: var(--shadow);">
+                    <form onsubmit="handleSellSubmit(event)">
+                        <div style="margin-bottom: 15px; text-align: left;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Crop Type /
+                                Produce</label>
+                            <input type="text" id="sell-crop"
+                                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;"
+                                placeholder="e.g. Cotton, Onion, Banana" required>
+                        </div>
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <div style="flex: 1; text-align: left;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Quantity</label>
+                                <input type="number" id="sell-qty"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;"
+                                    placeholder="Amount" required>
+                            </div>
+                            <div style="flex: 1; text-align: left;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Unit</label>
+                                <select id="sell-unit"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                                    <option value="Quintal">Quintals</option>
+                                    <option value="Ton">Tons</option>
+                                    <option value="Kg">Kg</option>
+                                    <option value="Liter">Liters (Milk)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px; text-align: left;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Expected Price (₹ per
+                                unit)</label>
+                            <input type="number" id="sell-price"
+                                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;"
+                                required>
+                        </div>
+                        <div style="margin-bottom: 25px; text-align: left;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Pickup Address /
+                                Details</label>
+                            <textarea id="sell-details" rows="3"
+                                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;"
+                                placeholder="Farm location or additional notes..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit & Get Tracking
+                            ID</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-market">
+        <section class="page-section">
+            <div class="container">
+                <h2 class="section-title">Today's Jalgaon Mandi Rates</h2>
+                <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background-color: var(--primary-color); color: white;">
+                            <tr>
+                                <th style="padding: 15px;">Crop</th>
+                                <th style="padding: 15px;">Min Price (₹/Qtl)</th>
+                                <th style="padding: 15px;">Max Price (₹/Qtl)</th>
+                                <th style="padding: 15px;">Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 15px; font-weight: 600;">Cotton</td>
+                                <td style="padding: 15px;">6,800</td>
+                                <td style="padding: 15px;">7,200</td>
+                                <td style="padding: 15px; color: green;"><i class="fa-solid fa-arrow-up"></i> +50</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 15px; font-weight: 600;">Onion</td>
+                                <td style="padding: 15px;">1,200</td>
+                                <td style="padding: 15px;">1,800</td>
+                                <td style="padding: 15px; color: red;"><i class="fa-solid fa-arrow-down"></i> -20</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 15px; font-weight: 600;">Banana</td>
+                                <td style="padding: 15px;">1,400</td>
+                                <td style="padding: 15px;">1,600</td>
+                                <td style="padding: 15px; color: #888;"><i class="fa-solid fa-minus"></i> 0</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 15px; font-weight: 600;">Soyabean</td>
+                                <td style="padding: 15px;">4,200</td>
+                                <td style="padding: 15px;">4,500</td>
+                                <td style="padding: 15px; color: green;"><i class="fa-solid fa-arrow-up"></i> +15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-doctor">
+        <section class="page-section">
+            <div class="container" style="max-width: 720px;">
+                <h2 class="section-title" style="text-align:center;">🌿 Crop Doctor</h2>
+                <p style="text-align:center; margin-bottom: 30px; color: var(--text-light);">Describe your crop's
+                    situation and get expert advice on treatment, care, and fertilizers to use.</p>
+
+                <div
+                    style="background: white; padding: 30px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 25px;">
+                    <form onsubmit="handleCropDoctorSubmit(event)">
+                        <div style="margin-bottom: 18px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Crop Name</label>
+                            <input type="text" id="cd-crop" placeholder="e.g. Cotton, Onion, Soyabean, Banana" required
+                                style="width:100%; padding:12px; border:1.5px solid #e5e7eb; border-radius:8px; outline:none; font-size:1rem;"
+                                onfocus="this.style.borderColor='var(--primary-color)'"
+                                onblur="this.style.borderColor='#e5e7eb'">
+                        </div>
+                        <div style="margin-bottom: 18px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Growth Stage</label>
+                            <select id="cd-stage"
+                                style="width:100%; padding:12px; border:1.5px solid #e5e7eb; border-radius:8px; outline:none; font-size:1rem; background:white;">
+                                <option value="seedling">Seedling / Germination</option>
+                                <option value="vegetative">Vegetative (Growing Stage)</option>
+                                <option value="flowering">Flowering</option>
+                                <option value="fruiting">Fruiting / Pod Formation</option>
+                                <option value="harvest">Near Harvest</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 18px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Describe the Problem /
+                                Situation</label>
+                            <textarea id="cd-situation" rows="4" required
+                                placeholder="e.g. Leaves are turning yellow at the edges, white powder on leaves, stunted growth, wilting in afternoon, holes in leaves..."
+                                style="width:100%; padding:12px; border:1.5px solid #e5e7eb; border-radius:8px; outline:none; font-size:1rem; resize:vertical;"
+                                onfocus="this.style.borderColor='var(--primary-color)'"
+                                onblur="this.style.borderColor='#e5e7eb'"></textarea>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Soil / Weather Condition
+                                (optional)</label>
+                            <input type="text" id="cd-soil"
+                                placeholder="e.g. Black cotton soil, sandy soil, heavy rain recently, dry weather"
+                                style="width:100%; padding:12px; border:1.5px solid #e5e7eb; border-radius:8px; outline:none; font-size:1rem;"
+                                onfocus="this.style.borderColor='var(--primary-color)'"
+                                onblur="this.style.borderColor='#e5e7eb'">
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            style="width:100%; font-size:1.1rem; padding:14px; border-radius:10px;">
+                            <i class="fa-solid fa-stethoscope"></i> Get Crop Advice
+                        </button>
+                    </form>
+                </div>
+
+                <div id="crop-doctor-result" style="display:none;"></div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-track">
+        <section class="page-section">
+            <div class="container" style="max-width: 800px;">
+                <h2 class="section-title" style="text-align: center;">Track Your Order</h2>
+                <div
+                    style="background: white; padding: 30px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 30px;">
+                    <p style="margin-bottom: 20px; text-align: center;">Enter your Tracking ID and your delivery address
+                        to see your live route.</p>
+                    <form onsubmit="handleTrackSubmit(event)">
+                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                            <input type="text" id="track-id"
+                                style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;"
+                                placeholder="e.g. AG-1234567890-123" required>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="track-user-address"
+                                style="width:100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; font-size:1rem; box-sizing:border-box;"
+                                placeholder="Your delivery address in Jalgaon (e.g. Near SBI Bank, Jamner Road, Jalgaon)">
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            style="width:100%; padding: 13px; font-size: 1rem;"><i
+                                class="fa-solid fa-location-arrow"></i> Track My Order</button>
+                    </form>
+                </div>
+
+                <div id="track-result"
+                    style="display: none; background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);">
+                    <div style="display: flex; flex-direction: column;">
+                        <!-- Address Banner -->
+                        <div id="track-address-banner"
+                            style="background: linear-gradient(90deg,#15803d,#22c55e); color:white; padding:14px 20px; display:flex; gap:20px; flex-wrap:wrap; align-items:center; font-size:0.9rem;">
+                            <span><i class="fa-solid fa-store"></i> <strong>From:</strong> <span
+                                    id="track-from-addr">Agrimart, Near Bus Stand, Jalgaon - 425001</span></span>
+                            <span style="opacity:0.6;">→</span>
+                            <span><i class="fa-solid fa-house"></i> <strong>To:</strong> <span id="track-to-addr">Your
+                                    Address</span></span>
+                        </div>
+                        <!-- Map View (Leaflet) -->
+                        <div style="flex: 1; height: 380px; background: #e5e7eb; position: relative;">
+                            <div id="track-map" style="width: 100%; height: 100%;"></div>
+                        </div>
+
+                        <!-- Status Timeline & Receipt -->
+                        <div style="flex: 1; padding: 30px; display: flex; flex-direction: column; gap: 30px;">
+                            <div style="flex: 1;">
+                                <h3 style="margin-bottom: 5px;" id="track-display-id">Order TRK-XXXXX</h3>
+                                <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+                                    <p style="color: var(--text-light); margin:0;" id="track-pickup-label">📦 Expected Pickup: <strong
+                                            id="track-pickup" style="color: var(--primary-color);">—</strong></p>
+                                    <p style="color: var(--text-light); margin:0;" id="track-eta-label">🚚 Expected Delivery: <strong
+                                            id="track-eta" style="color: var(--primary-color);">—</strong></p>
+                                </div>
+
+                                <div id="track-timeline-container"
+                                    style="position: relative; padding-left: 20px; border-left: 2px solid var(--primary-color);">
+                                    <!-- Dynamic Timeline INJECTED via JS -->
+                                </div>
+                            </div>
+
+                            <!-- Your Order Section -->
+                            <div
+                                style="flex: 1; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;">
+                                    <h4 style="margin: 0;">Your Order Details</h4>
+                                    <button id="track-download-bill-btn" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.85rem; display: none;">
+                                        <i class="fa-solid fa-file-invoice"></i> Download Bill
+                                    </button>
+                                </div>
+                                <div id="track-order-items" style="display: flex; flex-direction: column; gap: 10px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-orders">
+        <section class="page-section">
+            <div class="container" style="max-width: 800px;">
+                <h2 class="section-title">My Orders</h2>
+                <div id="orders-list-container" style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Injected by app.js -->
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-login">
+        <section class="page-section" style="display: flex; align-items: center; justify-content: center;">
+            <div class="container" style="max-width: 450px;">
+                <div
+                    style="background: white; padding: 40px; border-radius: 12px; box-shadow: var(--shadow); text-align: center;">
+                    <h2 class="section-title" style="margin-bottom: 20px;">Welcome Back!</h2>
+                    <div id="login-feedback-msg"
+                        style="color: var(--text-light); margin-bottom: 30px; line-height: 1.5;">Login with your phone
+                        number to access Jalgaon's premium market.</div>
+
+                    <div id="phone-step">
+                        <form onsubmit="handlePhoneSubmit(event)">
+                            <div style="margin-bottom: 20px; text-align: left;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Phone
+                                    Number</label>
+                                <div style="display: flex;">
+                                    <span
+                                        style="padding: 12px; background: #f3f4f6; border: 1px solid #ccc; border-right: none; border-radius: 8px 0 0 8px;">+91</span>
+                                    <input type="tel" id="login-phone" pattern="[0-9]{10}"
+                                        style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 0 8px 8px 0; outline: none;"
+                                        placeholder="10-digit mobile number" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Get OTP</button>
+                        </form>
+                    </div>
+
+                    <div id="otp-step" style="display: none;">
+                        <form onsubmit="handleOtpSubmit(event)">
+                            <div style="margin-bottom: 20px; text-align: left;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Enter OTP</label>
+                                <input type="text" id="login-otp" pattern="[0-9]{4,6}"
+                                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; letter-spacing: 5px; text-align: center; font-size: 1.2rem;"
+                                    placeholder="• • • •" required>
+                                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 8px;">OTP sent to
+                                    <span id="display-phone" style="font-weight: 600;"></span>. <a href="#"
+                                        onclick="resetLogin()" style="color: var(--primary-color);">Change</a></p>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Verify & Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-farmer-card">
+        <section class="page-section">
+            <div class="container" style="max-width: 800px;">
+                <h2 class="section-title">My Farmer Card</h2>
+                <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                    <!-- Premium ID Card Visual -->
+                    <div
+                        style="flex: 1; min-width: 300px; max-width: 400px; display: flex; flex-direction: column; gap: 15px;">
+                        <div id="farmer-card-element"
+                            style="background: linear-gradient(135deg, #15803d, #22c55e); border-radius: 16px; padding: 30px; color: white; box-shadow: 0 15px 35px rgba(21, 128, 61, 0.4); position: relative; overflow: hidden; font-family: 'Inter', sans-serif;">
+
+                            <!-- Glassmorphism overlays -->
+                            <div
+                                style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; backdrop-filter: blur(10px);">
+                            </div>
+                            <div
+                                style="position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; backdrop-filter: blur(10px);">
+                            </div>
+
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 15px;">
+                                <div>
+                                    <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;"><i
+                                            class="fa-solid fa-leaf"></i> AGRIMART</h3>
+                                    <p style="margin: 0; font-size: 0.8rem; opacity: 0.9;">JALGAON, MAHARASHTRA</p>
+                                </div>
+                                <div
+                                    style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                    VERIFIED <i class="fa-solid fa-circle-check" style="color: #bbf7d0;"></i>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 25px;">
+                                <div
+                                    style="font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+                                    Farmer Name</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2);"
+                                    id="display-fc-name">Unknown Farmer</div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                                <div>
+                                    <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;"><i
+                                            class="fa-solid fa-phone"></i> Contact</div>
+                                    <div style="font-size: 0.95rem; font-weight: 500;" id="display-fc-phone">+91
+                                        0000000000</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;"><i
+                                            class="fa-solid fa-location-dot"></i> Village/Tehsil</div>
+                                    <div style="font-size: 0.95rem; font-weight: 500;" id="display-fc-village">Not Set
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <div
+                                    style="background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; font-family: monospace; letter-spacing: 2px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <span style="opacity:0.7; font-size:0.7rem;">ID NO:</span> AGRI-<span
+                                        id="display-fc-id">000</span>
+                                </div>
+                                <!-- User QR Code -->
+                                <img id="fc-qr-code" src=""
+                                    style="width: 50px; height: 50px; border-radius: 4px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                                    alt="QR">
+                            </div>
+                        </div>
+
+                        <button onclick="downloadFarmerCard()" class="btn btn-primary"
+                            style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <i class="fa-solid fa-download"></i> Download ID Card
+                        </button>
+                    </div>
+
+                    <!-- Details Form -->
+                    <div
+                        style="flex: 1; min-width: 300px; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--shadow);">
+                        <h3 style="margin-bottom: 20px;">Update Details</h3>
+                        <form onsubmit="handleFarmerCardUpdate(event)">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Full Name</label>
+                                <input type="text" id="fc-name"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label
+                                    style="display: block; margin-bottom: 5px; font-weight: 600;">Village/Tehsil</label>
+                                <input type="text" id="fc-village"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Land Size
+                                    (Acres)</label>
+                                <input type="text" id="fc-land"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Crops Grown</label>
+                                <input type="text" id="fc-crops" placeholder="E.g., Cotton, Soyabean"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-cart">
+        <section class="page-section">
+            <div class="container" style="max-width: 800px;">
+                <h2 class="section-title">Your Cart</h2>
+                <div style="background: white; border-radius: 12px; box-shadow: var(--shadow); padding: 30px;">
+                    <div id="cart-items-container">
+                        Loading cart...
+                    </div>
+
+                    <div id="checkout-area"
+                        style="display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px;">
+                        <h3 id="cart-total"
+                            style="text-align: right; margin-bottom: 20px; font-size: 1.5rem; color: var(--primary-color);">
+                            Total: ₹0</h3>
+
+                        <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 15px;">Payment Method</h4>
+                            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                                <label
+                                    style="flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; cursor: pointer; display: block;">
+                                    <input type="radio" name="payment" value="cash" checked style="margin-right: 10px;">
+                                    Cash on Delivery
+                                </label>
+                                <label
+                                    style="flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; cursor: pointer; display: block;">
+                                    <input type="radio" name="payment" value="online" style="margin-right: 10px;">
+                                    Online Payment
+                                </label>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;"
+                                onclick="checkout(document.querySelector('input[name=\'payment\']:checked').value)">Place
+                                Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- Global Payment Modal -->
+    <div id="payment-gateway-modal" class="payment-modal">
+        <div class="payment-content">
+            <h3 style="margin-bottom: 20px; text-align: center;">Secure Checkout</h3>
+            <div
+                style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <span style="font-size: 0.9rem; color: #166534;">Total Amount Payable</span>
+                <div id="pay-amount-display"
+                    style="font-size: 1.5rem; font-weight: bold; color: #15803d; margin-top: 5px;">₹0</div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch;">
+                <button class="pay-option-btn selected" onclick="selectPayOption('qr', this)" style="flex: 0 0 auto;"><i
+                        class="fa-solid fa-qrcode"></i> QR Code</button>
+                <button class="pay-option-btn" onclick="selectPayOption('card', this)" style="flex: 0 0 auto;"><i
+                        class="fa-solid fa-credit-card"></i> Card</button>
+                <button class="pay-option-btn" onclick="selectPayOption('gpay', this)" style="flex: 0 0 auto;"><i
+                        class="fa-brands fa-google-pay" style="font-size: 1.5rem"></i></button>
+                <button class="pay-option-btn" onclick="selectPayOption('paytm', this)" style="flex: 0 0 auto; color: #00b9f5; font-weight: 600;">Paytm</button>
+                <button class="pay-option-btn" onclick="selectPayOption('phonepe', this)" style="flex: 0 0 auto; color: #5f259f; font-weight: 600;">PhonePe</button>
+            </div>
+
+            <div id="pay-view-qr" class="pay-view">
+                <div
+                    style="text-align: center; padding: 20px; background: white; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 15px;">
+                    <img id="dynamic-qr-image" src="" alt="UPI QR Code"
+                        style="width: 200px; height: 200px; display: none; margin: 0 auto 10px auto;">
+                    <i id="qr-loading-icon" class="fa-solid fa-qrcode" style="font-size: 6rem; color: #333;"></i>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">Scan with any UPI app</p>
+                </div>
+            </div>
+
+            <div id="pay-view-card" class="pay-view" style="display: none;">
+                <input type="text" placeholder="Card Number"
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; margin-bottom: 10px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" placeholder="MM/YY"
+                        style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none;">
+                    <input type="text" placeholder="CVV"
+                        style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none;">
+                </div>
+            </div>
+
+            <div id="pay-view-gpay" class="pay-view" style="display: none;">
+                <div
+                    style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; margin-bottom: 15px;">
+                    <i class="fa-brands fa-google-pay" style="font-size: 3rem; color: #5f6368;"></i>
+                    <p style="margin-top: 10px;">Linked to phone number</p>
+                </div>
+            </div>
+
+            <div id="pay-view-paytm" class="pay-view" style="display: none;">
+                <div
+                    style="text-align: center; padding: 20px; background: #f0fbff; border-radius: 8px; margin-bottom: 15px;">
+                    <h2 style="color: #00b9f5; margin-bottom: 10px; font-style: italic; font-weight: 900;">Paytm</h2>
+                    <p style="margin-top: 10px;">Pay securely with Paytm</p>
+                </div>
+            </div>
+
+            <div id="pay-view-phonepe" class="pay-view" style="display: none;">
+                <div
+                    style="text-align: center; padding: 20px; background: #fdf5ff; border-radius: 8px; margin-bottom: 15px;">
+                    <h2 style="color: #5f259f; margin-bottom: 10px; font-weight: 800;">PhonePe</h2>
+                    <p style="margin-top: 10px;">Pay securely via PhonePe</p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="btn-process-payment"
+                style="width: 100%; font-size: 1.1rem; padding: 15px;" onclick="processMockPayment()">Pay Now</button>
+            <button class="btn btn-secondary"
+                style="width: 100%; margin-top: 10px; border: none; background: transparent; color: #666;"
+                onclick="document.getElementById('payment-gateway-modal').classList.remove('active')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Checkout Success Modal -->
+    <div id="success-modal" class="payment-modal">
+        <div class="payment-content" style="text-align: center; max-width: 400px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: #16a34a; margin-bottom: 20px;"></i>
+            <h3 style="margin-bottom: 15px; color: var(--primary-color);">Success!</h3>
+            <p style="color: #666; margin-bottom: 25px;" id="success-modal-msg">Your action was completed successfully.
+            </p>
+            <button class="btn btn-primary" id="btn-download-bill"
+                style="width: 100%; font-size: 1.1rem; padding: 15px; margin-bottom: 10px;">
+                <i class="fa-solid fa-file-pdf"></i> Download Receipt
+            </button>
+            <button class="btn btn-secondary" style="width: 100%; background: transparent; color: #666; border: none;"
+                onclick="document.getElementById('success-modal').classList.remove('active'); navigate('orders');">View
+                My Orders</button>
+        </div>
+    </div>
+
+    <!-- Floating Contact Bar -->
+    <div class="floating-contact">
+        <a href="tel:+919552961621" class="contact-btn phone-btn" title="Call Owner">
+            <i class="fa-solid fa-phone"></i>
+        </a>
+        <a href="https://maps.google.com/?q=Jalgaon,+Maharashtra" target="_blank" class="contact-btn map-btn"
+            title="Shop Location Jalgaon">
+            <i class="fa-solid fa-location-dot"></i>
+        </a>
+    </div>
+
+    <!-- Hidden Invoice Template for Image Generation -->
+    <div id="invoice-render-container" style="position: absolute; top: -9999px; left: -9999px;">
+        <div id="invoice-template"
+            style="width: 800px; background: white; padding: 40px; font-family: 'Inter', sans-serif; color: #333;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2E7D32; padding-bottom: 20px; margin-bottom: 30px;">
+                <div>
+                    <h1
+                        style="color: #2E7D32; margin: 0; font-size: 2rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-leaf"></i> Agrimart
+                    </h1>
+                    <p style="margin: 5px 0 0 0; color: #666;">Jalgaon's Premium Farmer Market</p>
+                    <p style="margin: 2px 0 0 0; color: #666;">Phone: +91 9552961621</p>
+                </div>
+                <div style="text-align: right;">
+                    <h2 style="margin: 0; color: #333; font-size: 2rem; text-transform: uppercase;" id="inv-title">
+                        INVOICE</h2>
+                    <p style="margin: 5px 0 0 0; font-weight: bold;">ID: <span id="inv-id">---</span></p>
+                    <p style="margin: 2px 0 0 0; color: #666;">Date: <span id="inv-date">---</span></p>
+                    <p style="margin: 2px 0 0 0; color: #666;">Time: <span id="inv-time">---</span></p>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+                <div>
+                    <h3 style="color: #666; font-size: 1rem; margin-bottom: 5px; text-transform: uppercase;">Billed To /
+                        Farmer Details:</h3>
+                    <p style="margin: 0; font-weight: bold; font-size: 1.2rem;" id="inv-customer-name">---</p>
+                    <p style="margin: 2px 0 0 0; color: #666;" id="inv-customer-phone">---</p>
+                    <p style="margin: 2px 0 0 0; color: #666;" id="inv-customer-address">Jalgaon, Maharashtra</p>
+                </div>
+                <div style="text-align: right;">
+                    <h3 style="color: #666; font-size: 1rem; margin-bottom: 5px; text-transform: uppercase;">Payment
+                        Status:</h3>
+                    <p style="margin: 0; font-weight: bold; font-size: 1.2rem; color: #166534;" id="inv-payment-status">
+                        ---</p>
+                    <p style="margin: 2px 0 0 0; color: #666;">Method: <span id="inv-payment-method">---</span></p>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr style="background-color: #f3f4f6;">
+                        <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #ccc; color: #333;">
+                            Description & Items</th>
+                        <th style="padding: 12px 15px; text-align: right; border-bottom: 2px solid #ccc; color: #333;">
+                            Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 20px 15px; border-bottom: 1px solid #eee; font-size: 1.1rem;"
+                            id="inv-items">---</td>
+                        <td style="padding: 20px 15px; border-bottom: 1px solid #eee; text-align: right; font-size: 1.1rem; font-weight: bold;"
+                            id="inv-total">---</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 40px;">
+                <div style="width: 300px;">
+                    <div
+                        style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                        <span>Subtotal:</span>
+                        <span id="inv-subtotal">---</span>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 2px solid #333; font-weight: bold; font-size: 1.3rem;">
+                        <span>Total:</span>
+                        <span id="inv-grand-total">---</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; color: #666; border-top: 1px solid #eee; padding-top: 20px;">
+                <p style="margin: 0; font-style: italic;">Thank you for your business. For any queries, please contact
+                    info@agrimart.com | +91 9552961621</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
